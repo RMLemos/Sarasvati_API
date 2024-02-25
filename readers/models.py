@@ -82,7 +82,7 @@ class Rating(Base):
     book = models.ForeignKey(UserBook, related_name='rating', on_delete=models.SET_NULL, blank=True, null=True)
     owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __int__(self):
         return self.rating
     
 
