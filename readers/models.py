@@ -22,14 +22,14 @@ class UserBook(Base):
         db_table = 'user_books'
 
     id_book = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    cover = models.ImageField(upload_to='/readers/cover', blank=True, default='')
+    cover = models.ImageField(upload_to='readers/cover', blank=True, default='')
     title = models.CharField('Title', max_length=100)
     publisher = models.CharField('Publisher', max_length=100)
     isbn = models.CharField('ISBN', unique=True, max_length=100)
     nr_pages = models.IntegerField('Pages',  null=True, blank=True)
     synopsis = models.TextField('Synopsis', null=True, blank=True)
     author = models.CharField('Author(s)', max_length=255, null=True, blank=True)
-    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Profile, related_name='books', on_delete=models.CASCADE,)
 
     def __str__(self) -> str:
             return self.title
@@ -60,10 +60,11 @@ class Status(Base):
         (2, 'Want to read'),
         (3, 'Current reading'),
     )
+
     id_status = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
     status = models.IntegerField(choices=STATUS_CHOICES)
-    book = models.ForeignKey(UserBook, on_delete=models.SET_NULL, blank=True, null=True)
+    book = models.ForeignKey(UserBook, related_name='status', on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Status: {self.get_status_display()}"
@@ -77,9 +78,9 @@ class Rating(Base):
         db_table = 'rating' 
 
     id_rating = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(blank=True, null=True, default=0,  validators=[MinValueValidator(0), MaxValueValidator(5),])
-    book = models.ForeignKey(UserBook, on_delete=models.SET_NULL, blank=True, null=True)
+    book = models.ForeignKey(UserBook, related_name='rating', on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.rating
@@ -93,9 +94,9 @@ class Notes(Base):
         db_table = 'notes'
 
     id_notes = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
     note = models.TextField('Notes', blank=True, null=True,)
-    book = models.ForeignKey(UserBook, on_delete=models.SET_NULL, blank=True, null=True)
+    book = models.ForeignKey(UserBook, related_name='notes', on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.note
